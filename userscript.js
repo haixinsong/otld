@@ -15,6 +15,7 @@
 // @match        *://*.jianshu.com/*
 // @match        *://*.juejin.cn/*
 // @match        *://*.weibo.cn/*
+// @match        *://*.weibo.com/*
 // @match        *://*.yuque.com/*
 // @match        *://*.segmentfault.com/*
 // @match        *://*.zhihu.com/*
@@ -35,7 +36,18 @@
                 url: href,
                 onload: function (response) {
                     console.log({ response });
-                    if (response.status == 200) {
+                    if (response.status != 200) {
+                        reject(href);
+                        return;
+                    }
+
+                    // weibo跳转会区分目标网址是否备案
+                    // 未备案的, 中转
+                    // 已备案的, 直跳
+                    let realURI = href;
+                    if (response.finalUrl === href) {
+                        // 未备案, 中转网址
+                        // 网址在html里
                         let doc = new DOMParser().parseFromString(response.responseText, "text/html");
                         let node = doc.querySelector('body > div > div:nth-child(2)');
                         let str = node.innerText;
@@ -43,16 +55,22 @@
                         console.log({ node });
                         console.log({ str });
 
-                        let realURI = href;
                         var extractURL = str.match(urlReg);
                         console.log({ extractURL });
                         if (extractURL) {
                             realURI = extractURL[0];
                         }
-                        resolve(realURI)
-                    } else {
-                        reject(href)
                     }
+                    else {
+                        // 已备案
+                        // 网址在finalUrl里
+                        var extractURL = response.finalUrl.match(urlReg);
+                        if (extractURL) {
+                            realURI = extractURL[0];
+                        }
+                    }
+
+                    resolve(realURI)
                 },
                 onerror: function (error) {
                     console.log({ error });
@@ -145,6 +163,11 @@
         // href="https://weibo.cn/sinaurl?f=w&u=http%3A%2F%2Ft.cn%2FA66XY2gI&ep=LlAsNz3HD%2C1683963007%2CLlpkandl6%2C7276218544"
         weibo: { pattern: /https?:\/\/weibo\.cn\/sinaurl\?f=w&u=(.+)$/, resolver: weiboResolver },
 
+        // http://t.cn/A66926Pm  未备案的, 跳转到中转网址,  response.finalUrl仍然还是http://t.cn/A66926Pm 目标网址出现在response.responseText里
+        // http://t.cn/A669K964  已备案的, 直接跳转到目标网址, 出现在response.finalUrl里
+        weibo2: { pattern: /(https?:\/\/t\.cn\/.*)$/, resolver: weiboResolver },
+
+
         // segmentfault对链接进行加密处理, 不知道如何decode, 所以只能写一个函数去单独处理
         // https://link.segmentfault.com/?enc=LZyRulLABKpXOHl2vbA%2F4w%3D%3D.MWhFMvjhyBk1ReIRoGxyxa0VxGtg%2Foyk0DMtfzZTJoKbsgoJFtGCPHe8%2BZ1HbRdcvNsGaVfll9oGQXLsZCHK7w%3D%3D
         segfault: { pattern: /https?:\/\/link\.segmentfault\.com\/?\?enc=(.+)$/, resolver: segfaultResolver }
@@ -194,14 +217,22 @@
         console.log({ e })
         let href = getHref(e);
         if (href) {
+
+            // 解析不到url, 不做处理
+            // 兼容如 href设置为 'javascript:void(0);' 等的情况Î
+            var extractURL = href.match(urlReg);
+            if (!extractURL) {
+                return;
+            }
+
             e.stopPropagation();
             e.preventDefault();
+
             resolveRealURI(href).then((realURI) => {
                 console.log({ realURI })
                 window.open(realURI);
-            });
+            }).catch(() => { window.open(href); })
         }
     }, { capture: true })
-
 
 })();
