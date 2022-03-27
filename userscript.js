@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.1.1
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -26,6 +26,28 @@
 
 (function () {
     'use strict';
+
+    const isValidURL = (url) => {
+        try {
+            new URL(url);
+            return true;
+        } catch (error) {
+            return isValidURLWithBase(url);
+        }
+    }
+
+    const isValidURLWithBase = (url) => {
+        try {
+            new URL(url, getCurrentURLBase());
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    const getCurrentURLBase = () => {
+        return window.location.origin;
+    }
 
     const urlReg = /\bhttps?:\/\/\S+/gi;
 
@@ -218,10 +240,9 @@
         let href = getHref(e);
         if (href) {
 
-            // 解析不到url, 不做处理
-            // 兼容如 href设置为 'javascript:void(0);' 等的情况Î
-            var extractURL = href.match(urlReg);
-            if (!extractURL) {
+            // 不是url, 则不做处理
+            // 兼容如 href设置为 'javascript:void(0);' 等的情况
+            if (!isValidURL(href)) {
                 return;
             }
 
