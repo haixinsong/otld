@@ -141,10 +141,11 @@
         // 注意这里的pattern需要去看对应网站dom里的a标签的实际herf值, console也会打印日志, 可以自己添加正则来增加网站支持
         // https://link.zhihu.com/?target=https%3A//greasyfork.org/en/scripts/5029-yet-another-%25E8%2587%25AA%25E5%258F%25A4cb%25E5%2587%25BA%25E8%25AF%2584%25E8%25AE%25BA-sharing-plugin
         zhihu: { pattern: /https?:\/\/link\.zhihu\.com\/?\?target=(.+)$/ },
-        // https://www.jianshu.com/go-wild?ac=2&url=https%3A%2F%2Fnpm.taobao.org%2Fmirrors%2Felectron
-        jianshu: { pattern: /https?:\/\/www\.jianshu\.com\/go-wild\?.*url=(.+)$/ },
+
+        // https://www.jianshu.com/p/a6a63a0c6e53
         // https://links.jianshu.com/go?to=https%3A%2F%2Fnpm.taobao.org%2Fmirrors%2Felectron
         jianshu2: { pattern: /https?:\/\/links\.jianshu\.com\/go\?to=(.+)$/ },
+
         // href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.aliyun.com%2Fgroup%2Falisoftwaretech%2F"
         juejin: { pattern: /https?:\/\/link\.juejin\.cn\/?\?target=(.+)$/ },
 
