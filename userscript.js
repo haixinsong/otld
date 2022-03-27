@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.1
+// @version      0.1.2
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -19,6 +19,7 @@
 // @match        *://*.yuque.com/*
 // @match        *://*.segmentfault.com/*
 // @match        *://*.zhihu.com/*
+// @match        *://*.bookmarkearth.com/*
 // @license      GPLv3 License
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
 // @grant        GM_xmlhttpRequest
@@ -77,7 +78,7 @@
                         console.log({ node });
                         console.log({ str });
 
-                        var extractURL = str.match(urlReg);
+                        let extractURL = str.match(urlReg);
                         console.log({ extractURL });
                         if (extractURL) {
                             realURI = extractURL[0];
@@ -86,7 +87,7 @@
                     else {
                         // 已备案
                         // 网址在finalUrl里
-                        var extractURL = response.finalUrl.match(urlReg);
+                        let extractURL = response.finalUrl.match(urlReg);
                         if (extractURL) {
                             realURI = extractURL[0];
                         }
@@ -118,7 +119,41 @@
                         console.log({ str });
 
                         let realURI = href;
-                        var extractURL = str.match(urlReg);
+                        let extractURL = str.match(urlReg);
+                        console.log({ extractURL });
+                        if (extractURL) {
+                            realURI = extractURL[0];
+                        }
+                        resolve(realURI)
+                    } else {
+                        reject(href)
+                    }
+                },
+                onerror: function (error) {
+                    console.log({ error });
+                    reject(href)
+                }
+            });
+        });
+    }
+
+    const bmeResolver = async (href) => {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: href,
+                onload: function (response) {
+                    console.log({ response });
+                    if (response.status == 200) {
+                        let doc = new DOMParser().parseFromString(response.responseText, "text/html");
+                        let node = doc.querySelector('body > div.row.box > div.col-lg-6.jump-box > div > div.content > p.link');
+                        let str = node.innerText;
+                        console.log({ doc });
+                        console.log({ node });
+                        console.log({ str });
+
+                        let realURI = href;
+                        let extractURL = str.match(urlReg);
                         console.log({ extractURL });
                         if (extractURL) {
                             realURI = extractURL[0];
@@ -188,12 +223,17 @@
 
         // http://t.cn/A66926Pm  未备案的, 跳转到中转网址,  response.finalUrl仍然还是http://t.cn/A66926Pm 目标网址出现在response.responseText里
         // http://t.cn/A669K964  已备案的, 直接跳转到目标网址, 出现在response.finalUrl里
-        weibo2: { pattern: /(https?:\/\/t\.cn\/.*)$/, resolver: weiboResolver },
+        weibo2: { pattern: /(https?:\/\/t\.cn\/.+)$/, resolver: weiboResolver },
 
 
         // segmentfault对链接进行加密处理, 不知道如何decode, 所以只能写一个函数去单独处理
         // https://link.segmentfault.com/?enc=LZyRulLABKpXOHl2vbA%2F4w%3D%3D.MWhFMvjhyBk1ReIRoGxyxa0VxGtg%2Foyk0DMtfzZTJoKbsgoJFtGCPHe8%2BZ1HbRdcvNsGaVfll9oGQXLsZCHK7w%3D%3D
-        segfault: { pattern: /https?:\/\/link\.segmentfault\.com\/?\?enc=(.+)$/, resolver: segfaultResolver }
+        segfault: { pattern: /https?:\/\/link\.segmentfault\.com\/?\?enc=(.+)$/, resolver: segfaultResolver },
+
+        // https://www.bookmarkearth.com/detail/097c687c98974691b2174bc1e85103d4
+        // https://show.bookmarkearth.com/view/801
+        bookmarkearth: { pattern: /(https?:\/\/show\.bookmarkearth\.com\/view\/.+)$/, resolver: bmeResolver },
+
 
         // 以下网站a标签的herf未修改, 推测是js做的弹窗, 所以不需要匹配, 也匹配不出来
         // csdn https://link.csdn.net/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FRegExp
