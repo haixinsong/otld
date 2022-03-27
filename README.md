@@ -4,6 +4,10 @@
   <br>
 </h1>
 
+## Description
+
+source code for [https://greasyfork.org/zh-CN/scripts/442187-open-the-link-directly](https://greasyfork.org/zh-CN/scripts/442187-open-the-link-directly)
+
 ## Features
 
 open the link directly
