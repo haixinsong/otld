@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.1.0
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -18,6 +18,7 @@
 // @match        *://*.yuque.com/*
 // @match        *://*.segmentfault.com/*
 // @match        *://*.zhihu.com/*
+// @license      GPLv3 License
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
