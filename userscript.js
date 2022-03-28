@@ -222,10 +222,6 @@
         // https://afdian.net/link?target=https%3A%2F%2Fwww.patreon.com%2Fuser%3Fu%3D6139561
         afdian: { pattern: /https?:\/\/afdian\.net\/link\?target=(.+)$/ },
 
-        // https://www.tianyancha.com/company/28723141
-        // https://www.tianyancha.com/security?target=https%3A%2F%2Fss.knet.cn%2Fverifyseal.dll%3Fsn%3De18042711010873571xsuv000000%26pa%3D111332
-        tianyancha: { pattern: /https?:\/\/www\.tianyancha\.com\/security\?target=(.+)$/ },
-
         // https://www.pixiv.net/users/25237
         // href="/jump.php?url=https%3A%2F%2Ftwitter.com%2Fomiya_io"
         // href="/jump.php?https%3A%2F%2Finstagram.com%2Fsnatti89%2F"
@@ -250,6 +246,7 @@
 
         // segmentfault对链接进行加密处理, 不知道如何decode, 所以只能写一个函数去单独处理
         // https://link.segmentfault.com/?enc=LZyRulLABKpXOHl2vbA%2F4w%3D%3D.MWhFMvjhyBk1ReIRoGxyxa0VxGtg%2Foyk0DMtfzZTJoKbsgoJFtGCPHe8%2BZ1HbRdcvNsGaVfll9oGQXLsZCHK7w%3D%3D
+        // https://segmentfault.com/a/1190000017434150
         segfault: { pattern: /https?:\/\/link\.segmentfault\.com\/?\?enc=(.+)$/, resolver: segfaultResolver },
 
         // https://www.bookmarkearth.com/detail/097c687c98974691b2174bc1e85103d4
@@ -266,6 +263,12 @@
 
         // https://www.yuque.com/yuque/gpvawt/fuu6h3
         yuque: { host: 'yuque.com' },
+
+        // https://www.tianyancha.com/company/28723141
+        // href="https://ss.knet.cn/verifyseal.dll?sn=e18042711010873571xsuv000000&pa=111332"
+        // https://www.tianyancha.com/security?target=https%3A%2F%2Fss.knet.cn%2Fverifyseal.dll%3Fsn%3De18042711010873571xsuv000000%26pa%3D111332
+        tianyancha: { host: 'tianyancha.com' },
+
     }
 
     const matchHostResolver = (url, host) => {
