@@ -20,13 +20,30 @@
 // @match        *://*.segmentfault.com/*
 // @match        *://*.zhihu.com/*
 // @match        *://*.bookmarkearth.com/*
+// @run-at       document-start
 // @license      GPLv3 License
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
 // @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
 // ==/UserScript==
 
 (function () {
     'use strict';
+
+    // 保存原始方法
+    unsafeWindow.__otld_open = unsafeWindow.open;
+    // 重写 open 方法
+    var myopen = function (url, name, features) {
+        console.log({ url }, { name }, { features });
+        // debugger;
+        return unsafeWindow.__otld_open(url, name, features);
+    }
+    // 屏蔽 JS 中对原生函数 native 属性的检测
+    var _myopen = myopen.bind(null);
+    _myopen.toString = unsafeWindow.__otld_open.toString;
+    Object.defineProperty(unsafeWindow, 'open', {
+        value: _myopen
+    });
 
     const getValidURL = (url) => {
         try {
