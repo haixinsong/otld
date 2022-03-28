@@ -28,21 +28,21 @@
 (function () {
     'use strict';
 
-    const isValidURL = (url) => {
+    const getValidURL = (url) => {
         try {
-            new URL(url);
-            return true;
+            let u = new URL(url);
+            return u;
         } catch (error) {
-            return isValidURLWithBase(url);
+            return getValidURLWithBase(url);
         }
     }
 
-    const isValidURLWithBase = (url) => {
+    const getValidURLWithBase = (url) => {
         try {
-            new URL(url, getCurrentURLBase());
-            return true;
+            let u = new URL(url, getCurrentURLBase());
+            return u;
         } catch (error) {
-            return false;
+            return null;
         }
     }
 
@@ -174,6 +174,9 @@
     const patter_match = {
 
         // 注意这里的pattern需要去看对应网站dom里的a标签的实际herf值, console也会打印日志, 可以自己添加正则来增加网站支持
+
+        // https://zhuanlan.zhihu.com/p/23333042
+        // https://link.zhihu.com/?target=https%3A//getkap.co/
         // https://link.zhihu.com/?target=https%3A//greasyfork.org/en/scripts/5029-yet-another-%25E8%2587%25AA%25E5%258F%25A4cb%25E5%2587%25BA%25E8%25AF%2584%25E8%25AE%25BA-sharing-plugin
         zhihu: { pattern: /https?:\/\/link\.zhihu\.com\/?\?target=(.+)$/ },
 
@@ -186,6 +189,8 @@
 
         // https://gitee.com/meetqy/acss-dnd
         // href="https://gitee.com/link?target=https%3A%2F%2Fcuyang.me%2Facss-dnd%2F"
+        // https://blog.gitee.com/2022/01/20/lowcodetools/
+        // https://link.juejin.cn/?target=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgitee.com%2Fnocobase%2Fnocobase
         gitee: { pattern: /https?:\/\/gitee\.com\/link\?target=(.+)$/ },
 
         // https://www.uisdc.com/build-b-end-grid-system
@@ -264,12 +269,11 @@
         return fallbackURI;
     }
 
-    const getHref = (e) => {
+    const getAnchorElement = (e) => {
         let target = e.target;
         while (target) {
             if (target.tagName.toLowerCase() === 'a' && target.hasAttribute('href')) {
-                console.log("find element", { target })
-                return target.getAttribute('href');
+                return target;
             }
             target = target.parentElement;
         }
@@ -278,23 +282,41 @@
 
     document.addEventListener('click', (e) => {
         console.log({ e })
-        let href = getHref(e);
-        if (href) {
 
-            // 不是url, 则不做处理
-            // 兼容如 href设置为 'javascript:void(0);' 等的情况
-            if (!isValidURL(href)) {
-                return;
-            }
-
-            e.stopPropagation();
-            e.preventDefault();
-
-            resolveRealURI(href).then((realURI) => {
-                console.log({ realURI })
-                window.open(realURI);
-            }).catch(() => { window.open(href); })
+        // 找到a标签
+        let anchor = getAnchorElement(e);
+        if (!anchor) {
+            return;
         }
+
+        console.log({ anchor })
+
+        let href = anchor.getAttribute('href');
+        if (!href) {
+            return;
+        }
+
+        // 不是url, 则不做处理
+        // 兼容如 href设置为 'javascript:void(0);' 等的情况
+        let url = getValidURL(href);
+        if (url === null) {
+            return;
+        }
+
+        console.log({ url });
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        let target = '_self';
+        if (anchor.hasAttribute('target')) {
+            target = anchor.getAttribute('target');
+        }
+
+        resolveRealURI(href).then((realURI) => {
+            console.log({ realURI })
+            window.open(realURI, target);
+        }).catch(() => { window.open(href, target); })
     }, { capture: true })
 
 })();
