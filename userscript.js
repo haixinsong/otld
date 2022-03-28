@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.2
+// @version      0.1.3
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -212,7 +212,7 @@
         // https://www.pixiv.net/users/25237
         // href="/jump.php?url=https%3A%2F%2Ftwitter.com%2Fomiya_io"
         // href="/jump.php?https%3A%2F%2Finstagram.com%2Fsnatti89%2F"
-        pixiv: { pattern: /\/jump\.php\?(?:url=)?(.+)$/ },
+        pixiv: { pattern: /https?:\/\/www\.pixiv\.net\/jump\.php\?(?:url=)?(.+)$/ },
 
         // https://my.oschina.net/androiddevs/blog/5496556
         // https://www.oschina.net/action/GoToLink?url=https%3A%2F%2Fmp.weixin.qq.com%2Fmp%2Fappmsgalbum%3F__biz%3DMzk0NDIwMTExNw%3D%3D%26action%3Dgetalbum%26album_id%3D1879128471667326981%23wechat_redirect
@@ -243,9 +243,42 @@
         // 以下网站a标签的herf未修改, 推测是js做的弹窗, 所以不需要匹配, 也匹配不出来
         // csdn https://link.csdn.net/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FRegExp
         // 语雀 https://www.yuque.com/r/goto?url=https%3A%2F%2Fwww.canva.cn%2F
+
+        // https://blog.csdn.net/weixin_41010294/article/details/85289852
+        csdn: { host: 'csdn.net' },
+
+        // https://www.yuque.com/yuque/gpvawt/fuu6h3
+        yuque: { host: 'yuque.com' },
+    }
+
+    const matchHostResolver = (url, host) => {
+        // 1. 需要当前网站与host匹配
+        if (!window.location.host.includes(host)) {
+            return false;
+        }
+        // 2. url为外链
+        if (url.host.includes(host)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    const getMatchPattern = (url) => {
+        for (let i in patter_match) {
+
+            if (patter_match[i].hasOwnProperty('host') && matchHostResolver(url, patter_match[i].host)) {
+                return patter_match[i];
+            }
+            if (patter_match[i].hasOwnProperty('pattern') && url.href.match(patter_match[i].pattern)) {
+                return patter_match[i];
+            }
+        }
+        return null;
     }
 
     const resolveRealURI = async (href) => {
+        // TODO 兼容套娃链接, 如 https://link.juejin.cn/?target=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgitee.com%2Fnocobase%2Fnocobase
         const fallbackURI = href;
 
         for (let i in patter_match) {
@@ -267,6 +300,25 @@
             return decodeURIComponent(encodeURI);
         }
         return fallbackURI;
+    }
+
+    const patternResolve = async (patter_match, href) => {
+
+        if (patter_match.hasOwnProperty('resolver')) {
+            // complex customize resolver
+            console.log(patter_match.resolver)
+            let realURI = await patter_match.resolver(href);
+            return realURI;
+        }
+
+        if (patter_match.hasOwnProperty('pattern')) {
+            const matcher = href.match(patter_match.pattern);
+            if (!matcher) { return href; }
+            const encodeURI = matcher[1];
+            return decodeURIComponent(encodeURI);
+        }
+
+        return href;
     }
 
     const getAnchorElement = (e) => {
@@ -305,6 +357,13 @@
 
         console.log({ url });
 
+        const matchPattern = getMatchPattern(url);
+        console.log({ matchPattern });
+        if (!matchPattern) {
+            console.log("不匹配处理规则, 如有误, 请反馈给我, 非常感谢");
+            return;
+        }
+
         e.stopPropagation();
         e.preventDefault();
 
@@ -313,10 +372,16 @@
             target = anchor.getAttribute('target');
         }
 
-        resolveRealURI(href).then((realURI) => {
-            console.log({ realURI })
+        // csdn 打开新标签页兼容处理
+        if (matchPattern == patter_match.csdn) {
+            target = '_blank';
+        }
+
+        console.log({ target });
+        patternResolve(matchPattern, url.href).then((realURI) => {
+            console.log({ realURI });
             window.open(realURI, target);
-        }).catch(() => { window.open(href, target); })
+        }).catch(() => { window.open(href, target); });
     }, { capture: true })
 
 })();
