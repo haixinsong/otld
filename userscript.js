@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.3
+// @version      0.1.4
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
 // @match        *://*.gitee.com/*
 // @match        *://*.uisdc.com/*
+// @match        *://*.uiiiuiii.com/*
 // @match        *://*.logonews.cn/*
 // @match        *://*.afdian.net/*
 // @match        *://*.tianyancha.com/*
@@ -231,6 +232,11 @@
         // https://www.oschina.net/action/GoToLink?url=https%3A%2F%2Fmp.weixin.qq.com%2Fmp%2Fappmsgalbum%3F__biz%3DMzk0NDIwMTExNw%3D%3D%26action%3Dgetalbum%26album_id%3D1879128471667326981%23wechat_redirect
         // href="https://www.oschina.net/action/GoToLink?url=https%3A%2F%2Fmp.weixin.qq.com%2Fmp%2Fappmsgalbum%3F__biz%3DMzk0NDIwMTExNw%3D%3D%26action%3Dgetalbum%26album_id%3D1879128471667326981%23wechat_redirect"
         oschina: { pattern: /https?:\/\/www\.oschina\.net\/action\/GoToLink\?url=(.+)$/ },
+
+
+        // https://uiiiuiii.com/software/491152.html
+        // https://link.uiiiuiii.com/?redirect=https%3A%2F%2Fwww.behance.net%2Fgallery%2F117044741%2FHARSHITA-FREE-SIGNATURE-FONT%3Ftracking_source%3Dfor_you_feed_recommended
+        uiiiuiii: { pattern: /https?:\/\/link\.uiiiuiii\.com\/?\?redirect=(.+)$/ },
 
         // https://weibo.cn/sinaurl?u=https%3A%2F%2Fwww.freebsd.org%2F
         // https://weibo.cn/sinaurl?toasturl=https%3A%2F%2Ftime.geekbang.org%2F
