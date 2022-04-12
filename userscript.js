@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.4
+// @version      0.1.5
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -21,6 +21,7 @@
 // @match        *://*.segmentfault.com/*
 // @match        *://*.zhihu.com/*
 // @match        *://*.bookmarkearth.com/*
+// @match        *://*.leetcode-cn.com/*
 // @run-at       document-start
 // @license      GPLv3 License
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
@@ -237,6 +238,10 @@
         // https://uiiiuiii.com/software/491152.html
         // https://link.uiiiuiii.com/?redirect=https%3A%2F%2Fwww.behance.net%2Fgallery%2F117044741%2FHARSHITA-FREE-SIGNATURE-FONT%3Ftracking_source%3Dfor_you_feed_recommended
         uiiiuiii: { pattern: /https?:\/\/link\.uiiiuiii\.com\/?\?redirect=(.+)$/ },
+
+        // https://leetcode-cn.com/circle/discuss/mL0gxC/
+        // https://leetcode-cn.com/link/?target=http%3A%2F%2Fwww.bytedance.com
+        leetcodecn: { pattern: /https?:\/\/leetcode-cn\.com\/link\/\?target=(.+)$/ },
 
         // https://weibo.cn/sinaurl?u=https%3A%2F%2Fwww.freebsd.org%2F
         // https://weibo.cn/sinaurl?toasturl=https%3A%2F%2Ftime.geekbang.org%2F
