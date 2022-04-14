@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.5
+// @version      0.1.6
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -63,6 +63,10 @@
         } catch (error) {
             return null;
         }
+    }
+
+    const isHttpProtocol = (url) => {
+        return url.protocol == 'http:' || url.protocol == 'https:';
     }
 
     const getCurrentURLBase = () => {
@@ -383,6 +387,10 @@
         // 兼容如 href设置为 'javascript:void(0);' 等的情况
         let url = getValidURL(href);
         if (url === null) {
+            return;
+        }
+
+        if (!isHttpProtocol(url)) {
             return;
         }
 
