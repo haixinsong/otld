@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.6
+// @version      0.1.7
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -22,6 +22,7 @@
 // @match        *://*.zhihu.com/*
 // @match        *://*.bookmarkearth.com/*
 // @match        *://*.leetcode-cn.com/*
+// @match        *://*.huaban.com/*
 // @run-at       document-start
 // @license      GPLv3 License
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
@@ -194,6 +195,44 @@
         });
     }
 
+    const huabanResolver = async (href) => {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: href,
+                onload: function (response) {
+                    console.log({ response });
+                    if (response.status == 200) {
+                        let doc = new DOMParser().parseFromString(response.responseText, "text/html");
+                        let node = doc.querySelector('body > script');
+                        let str = node.innerText;
+                        const obj = JSON.parse(str);
+                        console.log({ doc });
+                        console.log({ node });
+                        console.log({ str });
+                        console.log({ obj });
+
+                        str = obj.props.pageProps.data.link;
+
+                        let realURI = href;
+                        let extractURL = str.match(urlReg);
+                        console.log({ extractURL });
+                        if (extractURL) {
+                            realURI = extractURL[0];
+                        }
+                        resolve(realURI)
+                    } else {
+                        reject(href)
+                    }
+                },
+                onerror: function (error) {
+                    console.log({ error });
+                    reject(href)
+                }
+            });
+        });
+    }
+
     const patter_match = {
 
         // 注意这里的pattern需要去看对应网站dom里的a标签的实际herf值, console也会打印日志, 可以自己添加正则来增加网站支持
@@ -246,6 +285,10 @@
         // https://leetcode-cn.com/circle/discuss/mL0gxC/
         // https://leetcode-cn.com/link/?target=http%3A%2F%2Fwww.bytedance.com
         leetcodecn: { pattern: /https?:\/\/leetcode-cn\.com\/link\/\?target=(.+)$/ },
+
+        // https://huaban.com/pins/4614750040
+        // https://huaban.com/go?pin_id=4614749616
+        huaban: { pattern: /https?:\/\/huaban\.com\/go\?pin_id=(.+)$/, resolver: huabanResolver },
 
         // https://weibo.cn/sinaurl?u=https%3A%2F%2Fwww.freebsd.org%2F
         // https://weibo.cn/sinaurl?toasturl=https%3A%2F%2Ftime.geekbang.org%2F
