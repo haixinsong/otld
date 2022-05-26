@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.7
+// @version      0.1.8
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -245,6 +245,10 @@
         // https://www.jianshu.com/p/a6a63a0c6e53
         // https://links.jianshu.com/go?to=https%3A%2F%2Fnpm.taobao.org%2Fmirrors%2Felectron
         jianshu2: { pattern: /https?:\/\/links\.jianshu\.com\/go\?to=(.+)$/ },
+
+        // https://www.jianshu.com/p/a3af2fb4d99e
+        // https://link.jianshu.com/?t=http://www.ihie.org/john-kansky
+        jianshu3: { pattern: /https?:\/\/link\.jianshu\.com\/\?t=(.+)$/ },
 
         // href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.aliyun.com%2Fgroup%2Falisoftwaretech%2F"
         juejin: { pattern: /https?:\/\/link\.juejin\.cn\/?\?target=(.+)$/ },
