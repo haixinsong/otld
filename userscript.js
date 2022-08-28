@@ -299,7 +299,7 @@
         // https://weibo.cn/sinaurl?luicode=10000011&lfid=230259&u=http%3A%2F%2Ft.cn%2FA6qHeVlf
         // https://weibo.cn/sinaurl?f=w&u=http%3A%2F%2Ft.cn%2FA66XY2gI&ep=LlAsNz3HD%2C1683963007%2CLlpkandl6%2C7276218544
         // href="https://weibo.cn/sinaurl?f=w&u=http%3A%2F%2Ft.cn%2FA66XY2gI&ep=LlAsNz3HD%2C1683963007%2CLlpkandl6%2C7276218544"
-        weibo: { pattern: /https?:\/\/weibo\.cn\/sinaurl\?f=w&u=(.+)$/, resolver: weiboResolver },
+        weibo: { pattern: /https?:\/\/weibo\.cn\/sinaurl\?[f=w&]?u=(.+)$/, resolver: weiboResolver },
 
         // http://t.cn/A66926Pm  未备案的, 跳转到中转网址,  response.finalUrl仍然还是http://t.cn/A66926Pm 目标网址出现在response.responseText里
         // http://t.cn/A669K964  已备案的, 直接跳转到目标网址, 出现在response.finalUrl里
