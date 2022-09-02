@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.8
+// @version      0.1.9
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
