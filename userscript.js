@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.9
+// @version      0.1.10
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -414,30 +414,15 @@
         return null;
     }
 
-    document.addEventListener('click', (e) => {
-        console.log({ e })
-
-        // 找到a标签
-        let anchor = getAnchorElement(e);
-        if (!anchor) {
-            return;
-        }
-
-        console.log({ anchor })
-
-        let href = anchor.getAttribute('href');
-        if (!href) {
-            return;
-        }
-
-        // 不是url, 则不做处理
-        // 兼容如 href设置为 'javascript:void(0);' 等的情况
-        let url = getValidURL(href);
-        if (url === null) {
-            return;
-        }
-
-        if (!isHttpProtocol(url)) {
+    /// 主体函数
+    /// link: 原始链接
+    /// e: 事件对象 
+    /// handleEventAfterMatch: 匹配到规则后的事件处理
+    /// handleRealURI: 处理真实链接
+    /// errCallback: 错误回调
+    const otld = (link, e, handleEventAfterMatch, handleRealURI, errCallback) => {
+        let url = getValidURL(link);
+        if (url === null || !isHttpProtocol(url)) {
             return;
         }
 
@@ -450,24 +435,61 @@
             return;
         }
 
-        e.stopPropagation();
-        e.preventDefault();
+        handleEventAfterMatch && handleEventAfterMatch(e);
 
-        let target = '_self';
-        if (anchor.hasAttribute('target')) {
-            target = anchor.getAttribute('target');
-        }
+        const target = (() => {
+            // csdn 打开新标签页兼容处理
+            if (matchPattern == patter_match.csdn) {
+                return '_blank';
+            }
 
-        // csdn 打开新标签页兼容处理
-        if (matchPattern == patter_match.csdn) {
-            target = '_blank';
-        }
+            if (!e || !getAnchorElement(e)) {
+                return '_self';
+            }
 
-        console.log({ target });
+            let anchor = getAnchorElement(e);
+            if (anchor.hasAttribute('target')) {
+                return anchor.getAttribute('target');
+            }
+            return '_self';
+        })();
+
         patternResolve(matchPattern, url.href).then((realURI) => {
             console.log({ realURI });
-            window.open(realURI, target);
-        }).catch(() => { window.open(href, target); });
+            handleRealURI(realURI, target);
+        }).catch(() => { errCallback && errCallback(target); });
+    }
+
+
+    document.addEventListener('click', (e) => {
+        console.log({ e })
+
+        // 找到a标签
+        let anchor = getAnchorElement(e);
+        if (!anchor) {
+            return;
+        }
+
+        console.log({ anchor })
+        let href = anchor.getAttribute('href');
+        if (!href) {
+            return;
+        }
+
+        const stopEvent = (e) => {
+            if (!e) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        otld(href, e, stopEvent, (realURI, target) => { window.open(realURI, target) }, (target) => { window.open(href, target); });
+
     }, { capture: true })
+
+    /// 处理手动输入或者鼠标拖动的链接
+    otld(window.location.href, null, null, (realURI, target) => { window.location.replace(realURI); }, null);
 
 })();
