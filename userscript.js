@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         open the link directly
 // @namespace    http://tampermonkey.net/
-// @version      0.1.10
+// @version      0.1.11
 // @description  点击链接直接跳转
 // @author       nediiii
 // @match        *://*.csdn.net/*
@@ -23,6 +23,9 @@
 // @match        *://*.bookmarkearth.com/*
 // @match        *://*.leetcode-cn.com/*
 // @match        *://*.huaban.com/*
+// @match        *://*.t.cn/*
+// @match        *://*.weibo.cn/*
+// @match        *://*.leetcode.cn/*
 // @run-at       document-start
 // @license      GPLv3 License
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
@@ -171,7 +174,8 @@
                     if (response.status == 200) {
                         let doc = new DOMParser().parseFromString(response.responseText, "text/html");
                         let node = doc.querySelector('body > div.row.box > div.col-lg-6.jump-box > div > div.content > p.link');
-                        let str = node.innerText;
+                        //querySelector('body > div > div > div').attributes['data-url'].value
+                        let str = doc.querySelector('body > div > div > div').attributes['data-url'].value;
                         console.log({ doc });
                         console.log({ node });
                         console.log({ str });
@@ -248,7 +252,9 @@
 
         // https://www.jianshu.com/p/a3af2fb4d99e
         // https://link.jianshu.com/?t=http://www.ihie.org/john-kansky
+        // https://www.jianshu.com/go-wild?ac=2&url=http%3A%2F%2Fwww.ihie.org%2Fjohn-kansky
         jianshu3: { pattern: /https?:\/\/link\.jianshu\.com\/\?t=(.+)$/ },
+        jianshu4: { pattern: /https?:\/\/www\.jianshu\.com\/go-wild\?ac=2&url=(.+)$/ },
 
         // href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.aliyun.com%2Fgroup%2Falisoftwaretech%2F"
         juejin: { pattern: /https?:\/\/link\.juejin\.cn\/?\?target=(.+)$/ },
@@ -290,13 +296,17 @@
         // https://leetcode-cn.com/link/?target=http%3A%2F%2Fwww.bytedance.com
         leetcodecn: { pattern: /https?:\/\/leetcode-cn\.com\/link\/\?target=(.+)$/ },
 
+        // https://leetcode.cn/link/?target=http%3A%2F%2Fwww.bytedance.com
+        leetcodecn2: { pattern: /https?:\/\/leetcode\.cn\/link\/\?target=(.+)$/ },
+
         // https://www.tianyancha.com/company/28723141
         // href="https://ss.knet.cn/verifyseal.dll?sn=e18042711010873571xsuv000000&pa=111332"
         // https://www.tianyancha.com/security?target=https%3A%2F%2Fss.knet.cn%2Fverifyseal.dll%3Fsn%3De18042711010873571xsuv000000%26pa%3D111332
         tianyancha: { pattern: /https?:\/\/www\.tianyancha\.com\/security\?target=(.+)$/ },
 
-        // https://huaban.com/pins/4614750040
+        // https://huaban.com/pins/5095905933
         // https://huaban.com/go?pin_id=4614749616
+        // https://huaban.com/go?pin_id=4614750040&url=item.taobao.com
         huaban: { pattern: /https?:\/\/huaban\.com\/go\?pin_id=(.+)$/, resolver: huabanResolver },
 
         // https://weibo.cn/sinaurl?u=https%3A%2F%2Fwww.freebsd.org%2F
@@ -304,7 +314,7 @@
         // https://weibo.cn/sinaurl?luicode=10000011&lfid=230259&u=http%3A%2F%2Ft.cn%2FA6qHeVlf
         // https://weibo.cn/sinaurl?f=w&u=http%3A%2F%2Ft.cn%2FA66XY2gI&ep=LlAsNz3HD%2C1683963007%2CLlpkandl6%2C7276218544
         // href="https://weibo.cn/sinaurl?f=w&u=http%3A%2F%2Ft.cn%2FA66XY2gI&ep=LlAsNz3HD%2C1683963007%2CLlpkandl6%2C7276218544"
-        weibo: { pattern: /https?:\/\/weibo\.cn\/sinaurl\?[f=w&]?u=(.+)$/, resolver: weiboResolver },
+        weibo: { pattern: /https?:\/\/weibo\.cn\/sinaurl\?(?:toasturl|u|f=w&u|ep)=(.+)$/, resolver: weiboResolver },
 
         // http://t.cn/A66926Pm  未备案的, 跳转到中转网址,  response.finalUrl仍然还是http://t.cn/A66926Pm 目标网址出现在response.responseText里
         // http://t.cn/A669K964  已备案的, 直接跳转到目标网址, 出现在response.finalUrl里
@@ -318,7 +328,9 @@
 
         // https://www.bookmarkearth.com/detail/097c687c98974691b2174bc1e85103d4
         // https://show.bookmarkearth.com/view/801
+        // https://www.bookmarkearth.com/view/801
         bookmarkearth: { pattern: /(https?:\/\/show\.bookmarkearth\.com\/view\/.+)$/, resolver: bmeResolver },
+        bookmarkearth2: { pattern: /(https?:\/\/www\.bookmarkearth\.com\/view\/.+)$/, resolver: bmeResolver },
 
         // 以下网站a标签的herf未修改, 推测是js做的弹窗, 所以不需要匹配, 也匹配不出来
         // csdn https://link.csdn.net/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FRegExp
@@ -326,6 +338,8 @@
 
         // https://blog.csdn.net/weixin_41010294/article/details/85289852
         csdn: { host: 'csdn.net' },
+        // https://link.csdn.net/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FRegExp
+        csdn2: { pattern: /https?:\/\/link\.csdn\.net\/\?target=(.+)$/ },
 
         // https://www.yuque.com/yuque/gpvawt/fuu6h3
         yuque: { host: 'yuque.com' },
@@ -346,7 +360,7 @@
 
     const getMatchPattern = (url) => {
         for (let i in patter_match) {
-
+            // console.log("url:", url, "patter_match[i]:", patter_match[i])
             if (patter_match[i].hasOwnProperty('host') && matchHostResolver(url, patter_match[i].host)) {
                 return patter_match[i];
             }
