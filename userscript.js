@@ -290,6 +290,11 @@
         // https://leetcode-cn.com/link/?target=http%3A%2F%2Fwww.bytedance.com
         leetcodecn: { pattern: /https?:\/\/leetcode-cn\.com\/link\/\?target=(.+)$/ },
 
+        // https://www.tianyancha.com/company/28723141
+        // href="https://ss.knet.cn/verifyseal.dll?sn=e18042711010873571xsuv000000&pa=111332"
+        // https://www.tianyancha.com/security?target=https%3A%2F%2Fss.knet.cn%2Fverifyseal.dll%3Fsn%3De18042711010873571xsuv000000%26pa%3D111332
+        tianyancha: { pattern: /https?:\/\/www\.tianyancha\.com\/security\?target=(.+)$/ },
+
         // https://huaban.com/pins/4614750040
         // https://huaban.com/go?pin_id=4614749616
         huaban: { pattern: /https?:\/\/huaban\.com\/go\?pin_id=(.+)$/, resolver: huabanResolver },
@@ -315,7 +320,6 @@
         // https://show.bookmarkearth.com/view/801
         bookmarkearth: { pattern: /(https?:\/\/show\.bookmarkearth\.com\/view\/.+)$/, resolver: bmeResolver },
 
-
         // 以下网站a标签的herf未修改, 推测是js做的弹窗, 所以不需要匹配, 也匹配不出来
         // csdn https://link.csdn.net/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FRegExp
         // 语雀 https://www.yuque.com/r/goto?url=https%3A%2F%2Fwww.canva.cn%2F
@@ -325,12 +329,6 @@
 
         // https://www.yuque.com/yuque/gpvawt/fuu6h3
         yuque: { host: 'yuque.com' },
-
-        // https://www.tianyancha.com/company/28723141
-        // href="https://ss.knet.cn/verifyseal.dll?sn=e18042711010873571xsuv000000&pa=111332"
-        // https://www.tianyancha.com/security?target=https%3A%2F%2Fss.knet.cn%2Fverifyseal.dll%3Fsn%3De18042711010873571xsuv000000%26pa%3D111332
-        tianyancha: { host: 'tianyancha.com' },
-
     }
 
     const matchHostResolver = (url, host) => {
